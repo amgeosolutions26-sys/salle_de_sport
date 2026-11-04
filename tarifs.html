@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Formules d'abonnement Elite Fitness Club."><title>Abonnements | ELITE FITNESS CLUB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css"></head>
+<body><header class="site-header" id="siteHeader"></header><main>
+<section class="page-hero bg" style="--img:url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1600&q=80')"><div><p class="eyebrow">CHOISIS TA FORMULE</p><h1>LES <span>ABONNEMENTS</span></h1></div></section>
+<section class="section pricing"><div class="pricing-grid">
+<article class="price-card reveal"><p class="plan-name">BASIC</p><h3>15 000 <small>FCFA</small></h3><p class="muted">par mois</p><ul><li>Accès à la salle</li><li>Équipements de musculation</li><li>Vestiaires</li></ul><button class="btn btn-outline choose-plan" data-plan="Basic">Choisir Basic</button></article>
+<article class="price-card featured reveal"><div class="popular">LE PLUS CHOISI</div><p class="plan-name">PREMIUM</p><h3>25 000 <small>FCFA</small></h3><p class="muted">par mois</p><ul><li>Accès complet à la salle</li><li>Cardio et musculation</li><li>Cours collectifs inclus</li><li>Conseils du coach</li></ul><button class="btn btn-gold choose-plan" data-plan="Premium">Choisir Premium</button></article>
+<article class="price-card reveal"><p class="plan-name">ANNUEL</p><h3>200 000 <small>FCFA</small></h3><p class="muted">par an</p><ul><li>Accès complet au club</li><li>Suivi de progression</li><li>Avantages fidélité</li></ul><button class="btn btn-outline choose-plan" data-plan="Annuel">Choisir Annuel</button></article></div>
+<p class="pricing-note">Tarifs de démonstration : remplace-les par les tarifs réels avant publication.</p></section>
+<section class="section join-section" id="inscription"><div><p class="eyebrow">TON PROCHAIN CHAPITRE COMMENCE ICI</p><h2>PRÊT À PASSER<br><span>AU NIVEAU SUPÉRIEUR ?</span></h2><p>Remplis le formulaire et l'équipe te recontactera.</p></div>
+<form id="registrationForm" class="join-form"><label>Nom complet<input name="name" required placeholder="Ton nom et prénom"></label><label>Téléphone<input name="phone" type="tel" required placeholder="+221 77 000 00 00"></label><label>Adresse e-mail<input name="email" type="email" required placeholder="exemple@email.com"></label><label>Formule souhaitée<select name="plan" id="planSelect" required><option value="">Choisir une formule</option><option>Basic</option><option>Premium</option><option>Annuel</option></select></label><button class="btn btn-gold" type="submit">Envoyer ma demande</button><p class="form-message" id="formMessage" aria-live="polite"></p></form></section>
+</main><footer id="siteFooter"></footer><script src="script.js"></script></body></html>
