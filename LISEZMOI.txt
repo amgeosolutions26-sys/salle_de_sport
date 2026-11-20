@@ -1,0 +1,13 @@
+ALLIANZ SALAM FITNESS CLUB - projet complet (site + admin + espace client) branche sur Supabase
+
+1) SUPABASE (une seule fois)
+   a. Supabase > SQL Editor > New query > coller tout schema.sql > Run (peut etre relance sans danger).
+   b. Authentication > Users > Add user : e-mail + mot de passe (coche "Auto Confirm User"). C'est le compte administrateur.
+   c. Authentication > Sign In / Providers : desactiver "Allow new users to sign up" (sinon n'importe qui pourrait creer un compte admin).
+2) XAMPP : copier ce dossier dans C:\xampp\htdocs\elite_fitness_starter puis ouvrir http://localhost/elite_fitness_starter/admin.html
+3) Espace client : dans l'admin, fiche d'un client > "Lien espace client" > envoyer le lien au client (client.html?c=...).
+   "Regenerer le QR" revoque aussi l'ancien lien.
+Fichiers : admin.html, client.html, script.js (boutique), supabase-config.js (URL + cle publique), schema.sql (base de donnees).
+
+MISE A JOUR : relancer schema.sql dans Supabase (SQL Editor > Run) pour creer les tables des commandes, demandes et paiements Wave/Orange Money.
+Puis admin > Paiements > "Paiement en ligne des clients" : saisir le lien Wave marchand et le numero Orange Money.

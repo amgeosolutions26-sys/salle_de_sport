@@ -1,11 +1,6 @@
 // ALLIANZ SALAM FITNESS CLUB — script commun à toutes les pages
-const WHATSAPP_NUMBER = "221773690652"; // numéro WhatsApp officiel, format international sans +
-// ---- INFOS DU CLUB : à modifier ici ----
-const CLUB = {phone:"+221 77 369 06 52", tel:"+221773690652", address:"Mbour 1, Thiès, Sénégal", mapQuery:"Allianz Salam Fitness Club, Mbour 1, Thiès, Sénégal"};
-const HOURS = [[10,14],[6,22],[6,22],[6,22],[6,22],[6,22],[6,22]]; // [ouverture, fermeture] de Dimanche(0) à Samedi(6) ; null = fermé
-const DAYS = ["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
-function clubState(){ const n = new Date(new Date().toLocaleString("en-US", {timeZone:"Africa/Dakar"})), t = HOURS[n.getDay()], h = n.getHours() + n.getMinutes() / 60; return {open: !!(t && h >= t[0] && h < t[1])}; }
-const U = (id, w = 1600) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=80`;
+const WHATSAPP_NUMBER = "221770000000"; // numéro WhatsApp officiel, format international sans +
+const U = id => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1600&q=80`;
 const $ = (s, r = document) => r.querySelector(s);
 const fmt = n => n.toLocaleString("fr-FR") + " FCFA";
 const wa = t => `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(t)}`;
@@ -35,33 +30,37 @@ const SCHEDULE = {
   "Dimanche":[["10:00","Étirements & récupération","Coach Fatou"]]
 };
 const PRODUCTS = [
-  {id:"p1",cat:"Vêtements",name:"T-shirt Salam Performance",desc:"Tissu respirant, séchage rapide.",price:12000,icon:"👕",tag:"NOUVEAU"},
+  {id:"p1",cat:"Vêtements",name:"T-shirt Allianz Performance",desc:"Tissu respirant, séchage rapide.",price:12000,icon:"👕",tag:"NOUVEAU"},
   {id:"p2",cat:"Vêtements",name:"Short d'entraînement",desc:"Léger et extensible.",price:10000,icon:"🩳"},
-  {id:"p3",cat:"Vêtements",name:"Legging Salam Femme",desc:"Taille haute, maintien optimal.",price:15000,icon:"🧘",tag:"POPULAIRE"},
-  {id:"p4",cat:"Vêtements",name:"Sweat à capuche Salam",desc:"Idéal échauffement et récupération.",price:22000,icon:"🧥"},
+  {id:"p3",cat:"Vêtements",name:"Legging Allianz Femme",desc:"Taille haute, maintien optimal.",price:15000,icon:"🧘",tag:"POPULAIRE"},
+  {id:"p4",cat:"Vêtements",name:"Sweat à capuche Allianz",desc:"Idéal échauffement et récupération.",price:22000,icon:"🧥"},
   {id:"p5",cat:"Accessoires",name:"Gourde isotherme 750 ml",desc:"Garde ton eau fraîche des heures.",price:8000,icon:"🥤"},
   {id:"p6",cat:"Accessoires",name:"Gants de musculation",desc:"Protègent les paumes, meilleure prise.",price:7000,icon:"🧤"},
-  {id:"p7",cat:"Accessoires",name:"Sac de sport Salam",desc:"Compartiment chaussures inclus.",price:18000,icon:"🎒",tag:"POPULAIRE"},
+  {id:"p7",cat:"Accessoires",name:"Sac de sport Allianz",desc:"Compartiment chaussures inclus.",price:18000,icon:"🎒",tag:"POPULAIRE"},
   {id:"p8",cat:"Accessoires",name:"Serviette microfibre",desc:"Compacte et très absorbante.",price:5000,icon:"🧺"},
   {id:"p9",cat:"Nutrition",name:"Whey protéine 900 g",desc:"Soutient la récupération musculaire.",price:28000,icon:"💪"},
-  {id:"p10",cat:"Nutrition",name:"Shaker Salam 700 ml",desc:"Mélange parfait, sans grumeaux.",price:4000,icon:"🥛"},
+  {id:"p10",cat:"Nutrition",name:"Shaker Allianz 700 ml",desc:"Mélange parfait, sans grumeaux.",price:4000,icon:"🥛"},
   {id:"p11",cat:"Récupération",name:"Rouleau de massage",desc:"Détends tes muscles après l'effort.",price:9000,icon:"🌀"},
   {id:"p12",cat:"Récupération",name:"Bandes élastiques (x3)",desc:"Trois niveaux de résistance.",price:6000,icon:"🎗️"}
 ];
+const SB_URL="https://paktcfipxaqvhvghgxsa.supabase.co",SB_KEY="sb_publishable_DWKL4ljpoNnCMFNfYiaFeA_tfMFmDKy";
+// Produits ajoutés depuis l'admin (Supabase) : copie locale pour un affichage immédiat, rafraîchie à chaque visite
+try{JSON.parse(localStorage.getItem("eliteProd")||"[]").forEach(p=>PRODUCTS.push({id:p.id,cat:p.cat,name:p.name,desc:p.desc||"",price:p.price,icon:"🛍️",image:p.image||"",tag:p.tag||""}))}catch(e){}
+const sbPost=(t,row)=>fetch(SB_URL+"/rest/v1/"+t,{method:"POST",headers:{apikey:SB_KEY,"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify(row)}).then(r=>{if(!r.ok)throw new Error("HTTP "+r.status)}),sbId=p=>p+"-"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),e2=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+fetch(SB_URL+"/rest/v1/products?on=eq.true&select=*&order=id",{headers:{apikey:SB_KEY}}).then(r=>r.ok?r.json():null).then(rows=>{if(!rows)return;const j=JSON.stringify(rows);if(j!==(localStorage.getItem("eliteProd")||"[]")){localStorage.setItem("eliteProd",j);location.reload()}}).catch(()=>{});
 const QUOTES = [["Une ambiance motivante et des coachs à l'écoute. J'ai gagné en force en 3 mois.","Aminata D."],["Les cours collectifs sont top, j'ai retrouvé le plaisir de m'entraîner.","Cheikh T."],["Salle propre, équipements récents, équipe au top. Je recommande !","Fatou S."]];
 
 // ---------- En-tête, pied de page, panier ----------
 const here = location.pathname.split("/").pop() || "index.html";
-const BRAND = `<a class="brand" href="index.html" aria-label="Allianz Salam Fitness Club"><img class="brand-mark" src="images/logo-192.png" alt=""><span class="brand-text">ALLIANZ <span>SALAM</span><small>FITNESS CLUB</small></span></a>`;
 const hd = $("#siteHeader");
-if (hd) hd.innerHTML = `${BRAND}
-<nav id="mainNav">${PAGES.map(([u,t]) => `<a href="${u}"${u===here?' class="active"':''}>${t}</a>`).join("")}<a class="nav-login" href="tarifs.html#inscription">Rejoindre</a><div class="lang"><button data-l="fr">FR</button><button data-l="en">EN</button><button data-l="wo">WO</button></div></nav>
+if (hd) hd.innerHTML = `<a class="brand" href="index.html"><img class="brand-logo" src="logo.jpg" alt=""><span class="brand-t">ALLIANZ SALAM <span>FITNESS CLUB</span></span></a>
+<nav id="mainNav">${PAGES.map(([u,t]) => `<a href="${u}"${u===here?' class="active"':''}>${t}</a>`).join("")}<a class="nav-login" href="tarifs.html#inscription">Rejoindre</a></nav>
 <div class="header-actions"><button class="cart-btn" id="cartBtn" aria-label="Panier">🛍 <span id="cartCount">0</span></button><button class="menu-toggle" id="menuToggle" aria-label="Menu">☰</button></div>`;
 const ft = $("#siteFooter");
-if (ft) ft.innerHTML = `<div>${BRAND}<p>La discipline construit les résultats.</p></div>
+if (ft) ft.innerHTML = `<div><a class="brand" href="index.html"><img class="brand-logo" src="logo.jpg" alt=""><span class="brand-t">ALLIANZ SALAM <span>FITNESS CLUB</span></span></a><p>La discipline construit les résultats.</p></div>
 <div><h4>NAVIGATION</h4>${PAGES.map(([u,t]) => `<a href="${u}">${t}</a><br>`).join("")}</div>
 <div><h4>ADMINISTRATION</h4><a href="admin.html">Demandes reçues (démo)</a></div>
-<div><h4>CONTACT</h4><p>${CLUB.address}<br><a href="tel:${CLUB.tel}">${CLUB.phone}</a></p><a href="${wa("Bonjour, je souhaite des informations.")}" target="_blank" rel="noopener">Écrire sur WhatsApp ↗</a><br><a href="#" class="open-map">Voir la carte ↗</a></div>
+<div><h4>CONTACT</h4><p>Adresse : à compléter<br>Téléphone : à compléter</p><a href="${wa("Bonjour, je souhaite des informations.")}" target="_blank" rel="noopener">Écrire sur WhatsApp ↗</a></div>
 <p class="copyright">© 2026 Allianz Salam Fitness Club — Tous droits réservés.</p>`;
 document.body.insertAdjacentHTML("beforeend", `<div class="cart-overlay" id="cartOverlay"></div><aside class="cart-drawer" id="cartDrawer" aria-hidden="true"><div class="cart-head"><h3>MON PANIER</h3><button id="cartClose" aria-label="Fermer">✕</button></div><div class="cart-items" id="cartItems"></div><div class="cart-foot"><div class="cart-total"><span>Total</span><strong id="cartTotal">0 FCFA</strong></div><button class="btn btn-gold" id="checkoutBtn">Commander sur WhatsApp</button><button class="btn btn-outline" id="clearCart">Vider le panier</button></div></aside>
 <a class="wa-float" href="${wa("Bonjour, je souhaite des informations.")}" target="_blank" rel="noopener" aria-label="WhatsApp">💬</a>`);
@@ -95,8 +94,16 @@ addEventListener("keydown", e => e.key === "Escape" && toggleCart(false));
 $("#clearCart").onclick = () => { cart = []; saveCart(); };
 $("#checkoutBtn").onclick = () => {
   if (!cart.length) return; let total = 0;
-  const lines = cart.map(l => { const p = PRODUCTS.find(x => x.id === l.id); total += p.price * l.qty; return `• ${l.qty} x ${p.name} (${fmt(p.price * l.qty)})`; });
-  window.open(wa(`Bonjour Allianz Salam Fitness, je souhaite commander :\n${lines.join("\n")}\n\nTotal : ${fmt(total)}\n\nMerci de confirmer la disponibilité et le mode de paiement/retrait.`), "_blank", "noopener");
+  const items = cart.map(l => { const p = PRODUCTS.find(x => x.id === l.id); total += p.price * l.qty; return {id:p.id, name:p.name, qty:l.qty, price:p.price}; });
+  const ov = document.createElement("div"); ov.style.cssText = "position:fixed;inset:0;background:#000b;z-index:200;display:grid;place-items:center;padding:16px;overflow:auto";
+  ov.innerHTML = `<form class="join-form" style="background:#161616;padding:26px;max-width:460px;width:100%"><h3 style="margin:0 0 6px;color:#fff">FINALISER MA COMMANDE</h3><p style="color:#bbb;margin:0 0 12px">${items.map(i => i.qty + " × " + e2(i.name)).join("<br>")}<br><b>Total : ${fmt(total)}</b></p><label>Nom complet<input name="name" required minlength="2" maxlength="100"></label><label>Téléphone<input name="phone" type="tel" required minlength="6" maxlength="30" placeholder="77 000 00 00"></label><label>Adresse / quartier<input name="address" maxlength="200"></label><label>Précisions (facultatif)<input name="note" maxlength="300"></label><button class="btn btn-gold">Envoyer ma commande</button> <button type="button" class="btn btn-outline" data-x>Annuler</button><p data-m style="color:#ffd24a;min-height:20px"></p></form>`;
+  ov.querySelector("[data-x]").onclick = () => ov.remove();
+  ov.querySelector("form").onsubmit = async e => { e.preventDefault(); const f = e.target, m = Object.fromEntries(new FormData(f)), msg = f.querySelector("[data-m]"); msg.textContent = "Envoi…";
+    try { await sbPost("orders", {id:sbId("ORD"), name:m.name.trim(), phone:m.phone.trim(), address:m.address.trim(), note:m.note.trim(), items, total});
+      cart = []; saveCart(); f.innerHTML = `<h3 style="color:#fff">MERCI !</h3><p style="color:#ddd">Votre commande est bien reçue. L'équipe vous contactera très vite au ${e2(m.phone)}.</p><button type="button" class="btn btn-gold" data-x>Fermer</button>`;
+      f.querySelector("[data-x]").onclick = () => { ov.remove(); toggleCart(false); };
+    } catch (err) { msg.textContent = "Envoi impossible, réessayez dans un instant."; } };
+  document.body.append(ov);
 };
 renderCart();
 
@@ -127,11 +134,11 @@ const teaser = $("#teaser"); if (teaser) renderProducts(teaser, PRODUCTS.filter(
 // ---------- Diaporama d'accueil ----------
 const sl = $("#slider");
 if (sl) {
-  sl.innerHTML = SLIDES.map(s => `<div class="slide"><div class="bg" style="--img:url('${s.img}')"></div><div class="slide-in"><p class="eyebrow">${s.eye}</p><h1>${s.h}</h1><p class="hero-copy">${s.p}</p><a class="btn btn-gold" href="${s.cta[1]}">${s.cta[0]}</a></div></div>`).join("") +
-    '<img class="hero-logo" src="images/logo-600.jpg" alt="Allianz Salam Fitness Club"><i class="bar"></i><button class="s-arrow prev" aria-label="Précédent">‹</button><button class="s-arrow next" aria-label="Suivant">›</button><div class="dots"></div>';
+  sl.innerHTML = SLIDES.map(s => `<div class="slide"><div class="bg" style="--img:url('${s.img}')"></div><div class="slide-in"><img class="hero-logo" src="logo.jpg" alt="Allianz Salam Fitness Club"><p class="eyebrow">${s.eye}</p><h1>${s.h}</h1><p class="hero-copy">${s.p}</p><a class="btn btn-gold" href="${s.cta[1]}">${s.cta[0]}</a></div></div>`).join("") +
+    '<button class="s-arrow prev" aria-label="Précédent">‹</button><button class="s-arrow next" aria-label="Suivant">›</button><div class="dots"></div>';
   const slides = sl.querySelectorAll(".slide"), dots = $(".dots", sl); let i = 0, t;
   slides.forEach((_, k) => { const d = document.createElement("button"); d.onclick = () => go(k); dots.appendChild(d); });
-  const go = n => { const bar = $(".bar", sl); bar.classList.remove("run"); void bar.offsetWidth; bar.classList.add("run"); i = (n + slides.length) % slides.length; slides.forEach((s, k) => s.classList.toggle("on", k === i)); [...dots.children].forEach((d, k) => d.classList.toggle("on", k === i)); clearInterval(t); t = setInterval(() => go(i + 1), 6000); };
+  const go = n => { i = (n + slides.length) % slides.length; slides.forEach((s, k) => s.classList.toggle("on", k === i)); [...dots.children].forEach((d, k) => d.classList.toggle("on", k === i)); clearInterval(t); t = setInterval(() => go(i + 1), 6000); };
   let sx = 0; sl.addEventListener("touchstart", e => sx = e.touches[0].clientX, {passive:true}); sl.addEventListener("touchend", e => { const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 50) go(i + (dx < 0 ? 1 : -1)); }, {passive:true});
   $(".prev", sl).onclick = () => go(i - 1); $(".next", sl).onclick = () => go(i + 1); go(0);
 }
@@ -152,12 +159,12 @@ if (days) {
 
 // ---------- Citations ----------
 const q = $("#quote");
-if (q) { let k = 0; const set = () => { q.classList.remove("in"); setTimeout(() => { q.innerHTML = `<p>${QUOTES[k][0]}</p><span>— ${QUOTES[k][1]}</span>`; q.classList.add("in"); k = (k + 1) % QUOTES.length; }, 300); }; set(); setInterval(set, 5000); }
+if (q) { let k = 0; const set = () => { q.classList.remove("in"); setTimeout(() => { q.innerHTML = `<p>« ${QUOTES[k][0]} »</p><span>— ${QUOTES[k][1]}</span>`; q.classList.add("in"); k = (k + 1) % QUOTES.length; }, 300); }; set(); setInterval(set, 5000); }
 
 // ---------- Compteurs + apparition au défilement ----------
 function observe(){
   if (!("IntersectionObserver" in window)) return document.querySelectorAll(".reveal").forEach(e => e.classList.add("in"));
-  const io = new IntersectionObserver(es => es.forEach((e, ix) => { if (!e.isIntersecting) return; e.target.style.transitionDelay = (ix % 4) * 90 + "ms"; setTimeout(() => e.target.style.transitionDelay = "", 1000); e.target.classList.add("in"); io.unobserve(e.target);
+  const io = new IntersectionObserver(es => es.forEach(e => { if (!e.isIntersecting) return; e.target.classList.add("in"); io.unobserve(e.target);
     if (e.target.dataset.count) { const end = +e.target.dataset.count; let n = 0; const s = setInterval(() => { n += Math.ceil(end / 40); if (n >= end) { n = end; clearInterval(s); } e.target.textContent = n.toLocaleString("fr-FR") + (e.target.dataset.suf || ""); }, 30); } }), {threshold:.15});
   document.querySelectorAll(".reveal:not(.in),[data-count]").forEach(e => io.observe(e));
 }
@@ -166,20 +173,21 @@ observe();
 // ---------- Formulaires ----------
 document.querySelectorAll(".choose-plan").forEach(b => b.onclick = () => { $("#planSelect").value = b.dataset.plan; $("#inscription").scrollIntoView({behavior:"smooth"}); });
 const form = $("#registrationForm");
-if (form) form.onsubmit = e => { e.preventDefault(); const m = Object.fromEntries(new FormData(form)); m.createdAt = new Date().toLocaleDateString("fr-FR");
-  const ms = JSON.parse(localStorage.getItem("eliteMembers") || "[]"); ms.push(m); localStorage.setItem("eliteMembers", JSON.stringify(ms));
-  window.open(wa(`Bonjour, je souhaite m'inscrire.\nNom : ${m.name}\nTéléphone : ${m.phone}\nE-mail : ${m.email}\nFormule : ${m.plan}`), "_blank", "noopener"); $("#formMessage").textContent = "Merci ! WhatsApp s'ouvre pour confirmer ta demande."; form.reset(); };
+if (form) form.onsubmit = async e => { e.preventDefault(); const m = Object.fromEntries(new FormData(form)), msg = $("#formMessage"), pl = m.plan || m.formule || [...form.querySelectorAll("select")].map(x => x.value)[0] || null; msg.textContent = "Envoi…";
+  try { await sbPost("join_requests", {id:sbId("JN"), kind:"inscription", name:(m.name || "").trim(), phone:(m.phone || "").trim(), plan:pl, address:(m.address || m.adresse || "").slice(0,200), message:Object.entries(m).filter(([k]) => !["name","phone","plan","formule","address","adresse"].includes(k)).map(([k,v]) => k + " : " + v).join(" | ").slice(0,1000)});
+    msg.textContent = "Merci ! Votre demande est bien reçue. L'équipe vous contactera très vite."; form.reset(); } catch (err) { msg.textContent = "Envoi impossible pour le moment, réessayez."; } };
 const cf = $("#contactForm");
-if (cf) cf.onsubmit = e => { e.preventDefault(); const m = Object.fromEntries(new FormData(cf)); window.open(wa(`Bonjour, je suis ${m.name} (${m.phone}).\n${m.message}`), "_blank", "noopener"); };
+if (cf) cf.onsubmit = async e => { e.preventDefault(); const m = Object.fromEntries(new FormData(cf)); const b = cf.querySelector("button"); b.disabled = true;
+  try { await sbPost("join_requests", {id:sbId("JN"), kind:"contact", name:m.name.trim(), phone:m.phone.trim(), message:(m.message || "").slice(0,1000)}); cf.innerHTML = '<p style="color:#fff;font-size:18px">Merci ! Votre message est bien reçu, nous vous rappelons très vite.</p>'; } catch (err) { b.disabled = false; alert("Envoi impossible pour le moment, réessayez."); } };
 
 
-// ---------- Couleurs : doré et noir (couleurs du logo), définies dans style.css (--gold) ----------
-
-
-document.body.insertAdjacentHTML("beforeend", `<div id="prog"></div><button id="toTop" aria-label="Haut de page">↑</button>`);
-
-
-
+// ---------- Thèmes de couleurs (choix du visiteur) ----------
+const THEMES = {Or:["#f5b800","#d99a00","#ffd24a","#2a2206"],Orange:["#ff5a1f","#c93e0c","#ff7d4d","#3a1a0c"], Lime:["#b6ff00","#5f8a00","#caff3d","#26330a"], Cyan:["#00c2ff","#007fa8","#4dd6ff","#0a2a36"], Rose:["#ff2d78","#bf1556","#ff5c98","#3a0f22"], Sable:["#c6a15b","#8b713e","#d8b875","#3b2f17"]};
+function applyTheme(n){ const t = THEMES[n] || THEMES.Orange, r = document.documentElement.style; ["--gold","--goldd","--goldh","--tint"].forEach((v, i) => r.setProperty(v, t[i])); try { localStorage.setItem("eliteTheme2", n); } catch (e) {} document.querySelectorAll(".theme-dot").forEach(d => d.classList.toggle("on", d.dataset.t === n)); }
+document.body.insertAdjacentHTML("beforeend", `<div class="theme-box" id="themeBox"><button class="theme-toggle" aria-label="Changer les couleurs">🎨</button><div class="theme-panel">${Object.keys(THEMES).map(n => `<button class="theme-dot" data-t="${n}" title="${n}" style="background:${THEMES[n][0]}"></button>`).join("")}</div></div><div id="prog"></div><button id="toTop" aria-label="Haut de page">↑</button>`);
+$(".theme-toggle").onclick = () => $("#themeBox").classList.toggle("open");
+document.querySelectorAll(".theme-dot").forEach(d => d.onclick = () => applyTheme(d.dataset.t));
+applyTheme((() => { try { return localStorage.getItem("eliteTheme2"); } catch (e) { return null; } })() || "Or");
 
 // ---------- Barre de progression + retour en haut ----------
 addEventListener("scroll", () => { const h = document.documentElement; $("#prog").style.width = (scrollY / Math.max(1, h.scrollHeight - innerHeight) * 100) + "%"; $("#toTop").classList.toggle("show", scrollY > 600); });
@@ -197,46 +205,3 @@ const bh = $("#bh");
 if (bh) { const bw = $("#bw"), calc = () => { const m = bh.value / 100, v = bw.value / (m * m), cat = v < 18.5 ? "Maigreur" : v < 25 ? "Poids normal" : v < 30 ? "Surpoids" : "Obésité";
   $("#hv").textContent = bh.value; $("#wv").textContent = bw.value; $("#bmiVal").textContent = v.toFixed(1); $("#bmiCat").textContent = cat; $("#bmiPin").style.left = Math.min(100, Math.max(0, (v - 15) / 25 * 100)) + "%"; };
   bh.oninput = bw.oninput = calc; calc(); }
-
-
-// ---------- Horaires + carte Google Maps ----------
-function renderFind(el){
-  const now = new Date(new Date().toLocaleString("en-US", {timeZone:"Africa/Dakar"})), d = now.getDay(), h = now.getHours() + now.getMinutes() / 60, t = HOURS[d];
-  const open = t && h >= t[0] && h < t[1], p2 = n => String(n).padStart(2, "0") + ":00";
-  el.innerHTML = `<div class="find-info"><p class="eyebrow">NOUS TROUVER</p><h2>VIENS NOUS <span>VOIR.</span></h2><span class="badge${open ? " on" : ""}">${open ? "Ouvert maintenant" : "Fermé actuellement"}</span>
-<h4>Adresse</h4><p>${CLUB.address}</p><h4>Horaires d'ouverture</h4><ul class="hours">${[1,2,3,4,5,6,0].map(i => `<li${i === d ? ' class="today"' : ""}><span>${DAYS[i]}</span><b>${HOURS[i] ? p2(HOURS[i][0]) + " – " + p2(HOURS[i][1]) : "Fermé"}</b></li>`).join("")}</ul>
-<div class="find-btns"><a class="btn btn-gold" href="tel:${CLUB.tel}">Appeler</a><a class="btn btn-outline" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(CLUB.mapQuery)}">Itinéraire</a></div></div>
-<div class="map-wrap"><iframe title="Carte Google Maps" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen src="https://www.google.com/maps?q=${encodeURIComponent(CLUB.mapQuery)}&output=embed"></iframe></div>`;
-}
-const fd = $("#findUs"); if (fd) renderFind(fd);
-
-
-// ---------- Fenêtre carte (ne gêne pas la page) ----------
-document.body.insertAdjacentHTML("beforeend", `<div class="modal" id="mapModal" aria-hidden="true"><div class="modal-card"><button class="modal-x" aria-label="Fermer">✕</button><div class="find" id="mapBody"></div></div></div>
-<div class="lightbox" id="lb"><button class="lb-x" aria-label="Fermer">✕</button><button class="lb-p" aria-label="Précédent">‹</button><img alt=""><button class="lb-n" aria-label="Suivant">›</button></div>`);
-const mapModal = $("#mapModal");
-function openMap(){ renderFind($("#mapBody")); mapModal.classList.add("open"); document.body.classList.add("lock"); }
-function closeMap(){ mapModal.classList.remove("open"); document.body.classList.remove("lock"); }
-$(".modal-x").onclick = closeMap; mapModal.addEventListener("click", e => { if (e.target === mapModal) closeMap(); });
-document.addEventListener("click", e => { if (e.target.closest(".open-map")) { e.preventDefault(); $("#mainNav").classList.remove("open"); openMap(); } });
-if (location.hash === "#localisation") openMap();
-
-// ---------- Galerie + lightbox ----------
-const GALLERY = ["1534438327276-14e5300c3a48","1517836357463-d25dfeac3438","1571019613454-1cb2f99b2d8b","1540497077202-7c8a3999166f","1583454110551-21f2fa2afe61","1576678927484-cc907957088c","1544367567-0f2fcb009e0b","1549576490-b0b4831ef60a"];
-const gl = $("#gallery"), lb = $("#lb"); let gi = 0;
-if (gl) { gl.innerHTML = GALLERY.map((g, k) => `<button class="g-item bg reveal" data-k="${k}" aria-label="Photo ${k + 1}" style="--img:url('${U(g, 700)}')"></button>`).join(""); observe(); gl.onclick = e => { const b = e.target.closest(".g-item"); if (b) showLb(+b.dataset.k); }; }
-function showLb(k){ gi = (k + GALLERY.length) % GALLERY.length; $("img", lb).src = U(GALLERY[gi], 1600); lb.classList.add("open"); document.body.classList.add("lock"); }
-function hideLb(){ lb.classList.remove("open"); document.body.classList.remove("lock"); }
-$(".lb-x").onclick = hideLb; $(".lb-p").onclick = () => showLb(gi - 1); $(".lb-n").onclick = () => showLb(gi + 1); lb.addEventListener("click", e => { if (e.target === lb) hideLb(); });
-let lx = 0; lb.addEventListener("touchstart", e => lx = e.touches[0].clientX, {passive:true}); lb.addEventListener("touchend", e => { const d = e.changedTouches[0].clientX - lx; if (Math.abs(d) > 50) showLb(gi + (d < 0 ? 1 : -1)); }, {passive:true});
-addEventListener("keydown", e => { if (e.key === "Escape") { closeMap(); hideLb(); } if (lb.classList.contains("open")) { if (e.key === "ArrowRight") showLb(gi + 1); if (e.key === "ArrowLeft") showLb(gi - 1); } });
-
-// ---------- Barre de navigation dynamique, parallaxe, boutons magnétiques, transitions ----------
-let ly = 0;
-addEventListener("scroll", () => { const y = scrollY; hd.classList.toggle("shrink", y > 60); hd.classList.toggle("hide", y > ly && y > 320 && !$("#mainNav").classList.contains("open")); ly = y;
-  const s = $("#slider"); if (s && y < 900) s.style.setProperty("--py", y * .18 + "px"); }, {passive:true});
-document.addEventListener("mousemove", e => { if (matchMedia("(hover:none)").matches) return; const b = e.target.closest?.(".btn-gold,.nav-login"); if (!b) return; const r = b.getBoundingClientRect(); b.style.transform = `translate(${(e.clientX - r.left - r.width / 2) * .18}px,${(e.clientY - r.top - r.height / 2) * .28}px)`; });
-document.addEventListener("mouseout", e => { const b = e.target.closest?.(".btn-gold,.nav-login"); if (b && !b.contains(e.relatedTarget)) b.style.transform = ""; });
-document.addEventListener("click", e => { const a = e.target.closest("a[href]"); if (!a || a.target || e.metaKey || e.ctrlKey || e.shiftKey || e.button) return; const u = new URL(a.href, location.href);
-  if (u.host !== location.host || !/\.html$/.test(u.pathname) || u.pathname === location.pathname) return; e.preventDefault(); document.body.classList.add("leaving"); setTimeout(() => location.href = a.href, 260); });
-addEventListener("pageshow", () => document.body.classList.remove("leaving"));
