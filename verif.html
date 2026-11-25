@@ -18,7 +18,10 @@
     .result.warn{background:var(--warn);border-color:var(--warn)}
     .result.bad{background:var(--bad);border-color:var(--bad)}
     .result h2{font-size:25px;margin:0 0 7px}
-    .name{font-size:20px;font-weight:700;margin:16px 0 6px}
+    .member{display:flex;align-items:center;justify-content:center;gap:14px;margin:18px 0 0}
+    .member-photo{width:88px;height:88px;flex:0 0 auto;object-fit:cover;border:3px solid #fff;border-radius:50%}
+    .member-photo.fallback{display:grid;place-items:center;background:#171717;color:#fff;font-size:23px;font-weight:700}
+    .name{font-size:20px;font-weight:700;margin:0;overflow-wrap:anywhere}
     .message{margin:0;line-height:1.55}
     .presence{color:#ddd;margin:12px 0 0}
     .hint{color:#aaa;font-size:13px;margin:16px 0 0}
@@ -48,7 +51,10 @@
         if(!data||typeof data!=="object")throw new Error("Réponse de vérification invalide.");
         const allowed=data.result==="authorized"||data.result==="warning";
         box.className="result "+(allowed?(data.result==="warning"?"warn":"ok"):"bad");
-        box.innerHTML=`<h2>${allowed?"ACCÈS AUTORISÉ":"ACCÈS REFUSÉ"}</h2><p class="message">${escapeHTML(names[data.reason]||"Vérification impossible.")}</p>${data.name?`<p class="name">${escapeHTML(data.name)}</p>`:""}${allowed?`<p class="presence">${data.presence==="duplicate"?"Présence déjà enregistrée récemment.":"Présence enregistrée à "+escapeHTML(data.time||"")+"."}</p>`:""}`;
+        const name=typeof data.name==="string"?data.name:"";
+        const photo=typeof data.photo==="string"&&/^data:image\/jpeg;base64,[a-z0-9+/]+=*$/i.test(data.photo)?data.photo:"";
+        const initials=escapeHTML(name.split(/\s+/).map(part=>part[0]||"").slice(0,2).join("").toUpperCase());
+        box.innerHTML=`<h2>${allowed?"ACCÈS AUTORISÉ":"ACCÈS REFUSÉ"}</h2><p class="message">${escapeHTML(names[data.reason]||"Vérification impossible.")}</p>${name?`<div class="member">${photo?`<img class="member-photo" src="${photo}" alt="Photo de ${escapeHTML(name)}">`:`<div class="member-photo fallback" role="img" aria-label="Photo non disponible">${initials}</div>`}<p class="name">${escapeHTML(name)}</p></div>`:""}${allowed?`<p class="presence">${data.presence==="duplicate"?"Présence déjà enregistrée récemment.":"Présence enregistrée à "+escapeHTML(data.time||"")+"."}</p>`:""}`;
       }catch(error){
         box.className="result bad";
         box.innerHTML=`<h2>Vérification impossible</h2><p class="message">${escapeHTML(error.message||error)}. Vérifiez la connexion et que le schéma Supabase a été mis à jour.</p>`;
