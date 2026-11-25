@@ -1,0 +1,26 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="logo.jpg"><title>Carte de membre | ALLIANZ SALAM FITNESS CLUB</title>
+<style>
+:root{--or:#f5b800;--ok:#1f8a70;--warn:#d9930d;--bad:#c4372c}*{box-sizing:border-box}body{margin:0;font:16px system-ui,sans-serif;background:#0a0a0a;color:#fff;min-height:100vh;display:grid;place-items:center;padding:16px}
+.w{width:min(440px,100%);text-align:center}.w img.lg{width:120px;border-radius:50%;box-shadow:0 0 30px #f5b80055}h1{font-size:18px;letter-spacing:1px;margin:10px 0 18px}
+.v{padding:18px;border-radius:6px}.v h2{margin:0 0 4px;font-size:24px}.v.ok{background:var(--ok)}.v.warn{background:var(--warn)}.v.bad{background:var(--bad)}
+.c{background:#161616;border:1px solid #333;padding:16px;margin-top:14px;text-align:left}.c img.ph{width:90px;height:90px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 3px var(--or);float:right}
+table{width:100%;border-collapse:collapse}td,th{padding:7px 0;border-bottom:1px solid #2a2a2a;text-align:left;font-weight:400}th{color:#aaa}
+input,button{width:100%;padding:12px;margin-top:8px;font:inherit;border:1px solid #444;background:#0a0a0a;color:#fff}button{background:var(--or);color:#111;font-weight:700;border:0;cursor:pointer}a{color:var(--or)}
+</style></head><body><div class="w"><img class="lg" src="logo.jpg" alt=""><h1>ALLIANZ SALAM FITNESS CLUB</h1><div id="o">Chargement…</div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.min.js"></script><script src="supabase-config.js"></script>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])),fd=s=>s?s.split("-").reverse().join("/"):"—",PL={m:"Mensuel",t:"Trimestriel",a:"Annuel"},TODAY=new Date().toISOString().slice(0,10);
+const q=new URLSearchParams(location.search).get("q")||"";const sb=supabase.createClient(SB_URL,SB_KEY);
+function staff(m){$("#o").innerHTML=`<div class="c"><b>Carte de membre</b><p style="color:#bbb">Ce code est personnel : présentez-le à l'accueil de la salle pour entrer.</p><hr style="border-color:#333"><b>Personnel de la salle</b><form id="f"><input name="e" type="email" placeholder="E-mail" required><input name="p" type="password" placeholder="Mot de passe" required><button>Se connecter et vérifier</button></form><p style="color:#ff8a7a">${m||""}</p></div>`;
+ $("#f").onsubmit=async e=>{e.preventDefault();const{error}=await sb.auth.signInWithPassword({email:e.target.e.value,password:e.target.p.value});error?staff("Identifiants incorrects."):location.reload()}}
+(async()=>{try{
+ const{data:{session}}=await sb.auth.getSession();if(!q){$("#o").textContent="Code QR manquant.";return}if(!session)return staff();
+ const{data:c,error}=await sb.from("clients").select("*").eq("qr",q).maybeSingle();if(error)throw error;
+ if(!c){$("#o").innerHTML=`<div class="v bad"><h2>ACCÈS REFUSÉ</h2>QR Code inconnu : client introuvable.</div>`;return}
+ const{data:ss}=await sb.from("subscriptions").select("*").eq("cid",c.id).order("end",{ascending:false}).limit(1),s=ss&&ss[0],dl=s?(Date.parse(s.end)-Date.parse(TODAY))/864e5:null;
+ let k="ok",msg="Abonnement valide : accès autorisé";if(c.state!=="actif"){k="bad";msg="Client "+c.state+" : accès refusé"}else if(!s||dl<0){k="bad";msg=s?"Abonnement expiré : accès refusé":"Aucun abonnement : accès refusé"}else if(dl<=7){k="warn";msg="Abonnement bientôt expiré : accès autorisé"}
+ let note="";if(k!=="bad"){const{data:r}=await sb.from("visits").select("t").eq("cid",c.id).gte("ts",Date.now()-72e5).limit(1),t=new Date().toTimeString().slice(0,5);
+  if(r&&r.length)note="Présence déjà enregistrée à "+(r[0].t||"")+" (pas de doublon).";else{const{error:e2}=await sb.from("visits").insert({id:"X"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),cid:c.id,date:TODAY,t,ts:Date.now()});note=e2?"Présence non enregistrée : "+e2.message:"Présence enregistrée à "+t+"."}}
+ $("#o").innerHTML=`<div class="v ${k}"><h2>${k==="bad"?"ACCÈS REFUSÉ":"ACCÈS AUTORISÉ"}</h2>${msg}</div><div class="c">${c.photo?`<img class="ph" src="${c.photo}" alt="">`:""}<b style="font-size:20px">${esc(c.prenom)} ${esc(c.nom)}</b><br>${esc(c.tel)}<table style="margin-top:10px"><tr><th>Formule</th><td>${s?PL[s.plan]:"—"}</td></tr><tr><th>Début</th><td>${s?fd(s.start):"—"}</td></tr><tr><th>Expiration</th><td>${s?fd(s.end):"—"}</td></tr><tr><th>Jours restants</th><td><b>${s?(dl<0?"Expiré depuis "+(-dl)+" j":dl===0?"Expire aujourd'hui":dl+" j"):"—"}</b></td></tr><tr><th>Compte</th><td>${esc(c.state)}</td></tr></table><p><b>${note}</b></p><a href="admin.html">← Retour à l'administration</a></div>`;
+}catch(e){$("#o").innerHTML=`<div class="v bad">Erreur : ${esc(e.message||e)}</div>`}})();
+</script></body></html>
