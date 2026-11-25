@@ -42,6 +42,69 @@ create index if not exists i_sub_cid on subscriptions(cid);
 create index if not exists i_pay_cid on payments(cid);
 create index if not exists i_vis_cid on visits(cid, date);
 
+-- Contrôle QR public : ne renvoie que le nom et le résultat d'accès, sans exposer les données du compte.
+create or replace function public.verify_member_qr(p_qr text) returns jsonb
+language plpgsql security definer set search_path = public, pg_temp as $$
+declare
+  c clients%rowtype;
+  s subscriptions%rowtype;
+  days_left integer;
+  visit_time text;
+  already_recorded boolean;
+begin
+  if coalesce(length(p_qr), 0) not between 1 and 64 then
+    return jsonb_build_object('result', 'denied', 'reason', 'unknown');
+  end if;
+
+  select * into c from clients where qr = p_qr limit 1;
+  if not found then
+    return jsonb_build_object('result', 'denied', 'reason', 'unknown');
+  end if;
+
+  if c.state <> 'actif' then
+    return jsonb_build_object('result', 'denied', 'reason', 'inactive', 'name', c.prenom || ' ' || c.nom);
+  end if;
+
+  select * into s from subscriptions where cid = c.id order by "end" desc limit 1;
+  if not found then
+    return jsonb_build_object('result', 'denied', 'reason', 'no_subscription', 'name', c.prenom || ' ' || c.nom);
+  end if;
+
+  days_left := s."end" - current_date;
+  if days_left < 0 then
+    return jsonb_build_object('result', 'denied', 'reason', 'expired', 'name', c.prenom || ' ' || c.nom);
+  end if;
+
+  visit_time := to_char(localtime, 'HH24:MI');
+  select exists (
+    select 1 from visits
+    where cid = c.id
+      and ts >= (extract(epoch from clock_timestamp() - interval '2 hours') * 1000)::bigint
+  ) into already_recorded;
+
+  if not already_recorded then
+    insert into visits(id, cid, date, t, ts)
+    values (
+      'V' || md5(random()::text || clock_timestamp()::text),
+      c.id,
+      current_date,
+      visit_time,
+      (extract(epoch from clock_timestamp()) * 1000)::bigint
+    );
+  end if;
+
+  return jsonb_build_object(
+    'result', case when days_left <= 7 then 'warning' else 'authorized' end,
+    'reason', case when days_left <= 7 then 'soon_expired' else 'valid' end,
+    'name', c.prenom || ' ' || c.nom,
+    'presence', case when already_recorded then 'duplicate' else 'recorded' end,
+    'time', visit_time
+  );
+end;
+$$;
+revoke all on function public.verify_member_qr(text) from public, anon, authenticated;
+grant execute on function public.verify_member_qr(text) to anon, authenticated;
+
 -- Sécurité : seul l'administrateur connecté (Supabase Auth) lit et écrit tout.
 do $$ declare t text; begin
   foreach t in array array['clients','subscriptions','payments','visits','courses','products','renewal_requests','orders','join_requests','settings','payment_claims'] loop
